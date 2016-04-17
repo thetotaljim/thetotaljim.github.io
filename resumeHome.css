@@ -9,7 +9,7 @@ body {
     body a:hover {
       color: yellow; }
   body .content {
-    background: url("https://www.dropbox.com/s/2mvvil180x0q8yc/JimCroppy.jpg?dl=0") no-repeat top right;
+    background: url("JimCroppy.jpg") no-repeat top right;
     height: 1398px;
     width: 1600px;
     margin: 0 0 0 auto;
