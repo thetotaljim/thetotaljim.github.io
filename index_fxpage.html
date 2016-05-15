@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>	
+	<meta charset="utf-8">
+	<title>Jim's Minesweeper App</title>
+	<script type="text/javascript>
+	function launchSweeper(){
+	
+		var myApp = document.getElementById("MySweeper.java");
+		myApp.java_method();
+	}
+	
+	function deployIt() {
+	
+		dtjava.embed(
+			{			id: "mySweeper",
+						url: "thetotaljim.github.io/MySweeper.java"
+						width:1200
+						height: 1200
+						placehoder: "place"
+						},
+						{},
+						{
+							onJavascriptReady: callApp
+						}
+			);
+		}	
+		dtjava.addOnloadCallback(deployIt);
+	</script>
+</head>
+<body>
+	<div id="place"></div>
+</body>
+	}
+</head>
+<body>
+</body>
+</html>
+
+
+	
