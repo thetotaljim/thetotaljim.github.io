@@ -450,6 +450,13 @@ header h2 {
   position: relative;
   width: 100%;
 }
+
+.copyright {
+  padding-top: 20px;
+   color: #dd3b2a;
+  
+}
+
 .requirements {
   left: 50%;
   margin-left: -520px;
