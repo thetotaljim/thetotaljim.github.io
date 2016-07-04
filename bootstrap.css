@@ -4964,7 +4964,7 @@ a.badge:focus {
   margin-bottom: 30px;
   color: inherit;
   <!--background-color: #eee;-->
-  background-image: url('thetotaljim.github.io/motherboard-wallpaper-1280x800.jpg') no-repeat center center;
+  background-image: url("thetotaljim.github.io/motherboard-wallpaper-1280x800.jpg") no-repeat center center;
 }
 .jumbotron h1,
 .jumbotron .h1 {
