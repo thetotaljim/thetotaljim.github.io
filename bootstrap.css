@@ -4963,8 +4963,7 @@ a.badge:focus {
   padding-bottom: 30px;
   margin-bottom: 30px;
   color: inherit;
-  <!--background-color: #eee;-->
-  background: url(motherboard-wallpaper-1280x800.jpg) no-repeat center center;
+  background-color: #eee;
 }
 .jumbotron h1,
 .jumbotron .h1 {
