@@ -1,0 +1,603 @@
+<!--
+		James Steimel 								
+		Homework One								
+		4500										
+		1/20/2017									
+		Written in JavaScript/HTML		
+
+		This program builds on Homework One by adding a graphical representation of the
+		tokens moving on the gameboard. It uses interval functions and drawing on a canvas
+		to acheive these goals.
+ -->
+ 
+<!DOCTYPE html>
+<html>
+<style>
+	body {
+		background-color: lightgrey;
+	}
+	canvas {
+		padding-left: 0;
+		padding-right: 0;
+		margin-left: auto;
+		margin-right: auto;
+		display: block;
+		width: 800px;
+	}
+	p {
+		border-left: 6px solid grey;
+		background-color: lightblue;
+	}
+</style>
+<body>
+<p>
+<h1>James Steimel Homework Two</h1>
+</p>
+<p><h2>The Move Pieces Game.</h2></p>
+<p><h3>How The Game Works:</h3><p>
+<p>The game is played using a grid as a gameboard, and red and blue tokens.  The tokens start at opposite corners of the board. Each turn, they can move one space in any direction, by using 2 coin flips to determine which direction the token will move (up/down,left/right).  If their move takes them off the board, they remain where they are. They take turns making moves until one piece lands on top of the other.  After hitting submit, the game will run and then display the winner, along with a delayed representation of the different squares that each token landed on.  To replay, you have to refresh the page.</p>
+<p>Quantity (between 5 and 20):</p>
+
+<!--	Here is the user input for the size of the game board.	-->
+<input id="numb" default="20">
+<button type="button" onclick="myFunction()">Submit</button>
+
+<!--	And these will be used to display the results of the game. -->
+<p id="first"></p>
+<p id="second"></p>
+<p id="third"></p>
+<p id="fourth"></p>
+<p id="demo"></p>
+
+<canvas id="myCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
+
+<script type="text/javascript">
+
+
+
+
+var boardMin = 0;
+var boardMax = 20;
+
+var redTurn = true;
+var randVal = 0;
+
+var red_piece = {};
+var blue_piece = {};
+var array = {};
+var arrIndx = 0;
+//	The Blue piece is also a JavaScript object.
+
+//	Variable to track what turn it is
+var turnNum = 0;
+//	Variable to track whether an overlap has occured.
+var overlapFound = false;
+//	Array to track how many times each spot on the
+//	game board gets touched.
+var timesTouchedCounters = {};
+//	Variable to track the number of entries in the timesTouchedCounters array.
+var timesCounter = 0;
+//	Variable to track who's turn it is.
+var redTurn = true;
+//	These variables track each piece's total number of turns.
+var redNumTurns = 0;
+var blueNumTurns = 0;
+//	This is to track how many time a space has been visited
+var outputCounter = 0;
+//	This is an array to hold the spaces that were touched the max num of times.
+var maxSpaces = {};
+//	This is variable to track the max number of times a space was touched
+var maxTimesTouched = 0;
+//	This is a variable to track the min number of times a space was touched
+var minTimesTouched = 9999999;
+//	This is an array to hold the spaces that were touched the min num of times.
+var minSpaces = {};
+//	Array to hold the spaces that have been touched by a piece
+var arrOfTouchTallies = {};
+//	Array index variable.
+var touchIndex = 0;
+
+var timing = 500,
+i = 0,
+j = 0,
+k = -1;
+l = -1;
+m = 0;
+n =0;
+output = document.getElementById('myCanvas');
+var ctx = output.getContext('2d');
+
+var retX;
+var retY;
+var retCol;
+var varCol;
+
+var firstTurn = true;
+
+
+function GameMove(color, x, y)
+{
+    this.color = color;
+    this.x = x;
+    this.y = y;
+
+    this.returnColor = function()
+    {
+        return this.color;
+    }
+    this.returnX = function()
+    {
+        return this.x;
+    }
+    this.returnY = function()
+    {
+        return this.y;
+    }
+};
+
+
+
+
+
+/****************************************************************/
+/*	This function is for moving the red piece.  It uses two		*/
+/*	coin flips to determine whether the movement is on the 		*/
+/*	x or y axis, and whether it is incremented or decremented	*/
+/*	by one.														*/
+/****************************************************************/
+function moveRedPiece() {
+
+	// First random coin flip, will result in 1 or 0
+	randVal = Math.floor(Math.random()*2);
+	//	Here we move the red_piece on the x axis
+	if (randVal == 0 ){
+		//	Second coin flip to determine +1 or -1
+		randVal = Math.floor(Math.random()*2);
+		if (randVal == 0){
+			red_piece["x_temp"] = red_piece["x_pos"] + 1;
+		}
+		else {
+			red_piece["x_temp"] = red_piece["x_pos"] - 1;
+		}
+	}
+	// or we move the red_piece on the y axis
+	else {
+		//	Another coin flip.
+		randVal = Math.floor(Math.random()*2);
+		if (randVal == 0){
+			red_piece["y_temp"] = red_piece["y_pos"] + 1;
+		}
+		else {
+			red_piece["y_temp"] = red_piece["y_pos"] - 1;
+		}
+	}
+}
+
+/****************************************************************/
+/*	This function is for moving the blue piece.  It uses two	*/
+/*	coin flips to determine whether the movement is on the 		*/
+/*	x or y axis, and whether it is incremented or decremented	*/
+/*	by one.														*/
+/****************************************************************/
+function moveBluePiece(){
+
+	// Now we Move the Blue Piece
+	randVal = Math.floor(Math.random()*2);
+	//	here we move the blue_piece on the x axis
+	if (randVal == 0 ){
+		randVal = Math.floor(Math.random()*2);
+		if (randVal == 0){
+			blue_piece["x_temp"] = blue_piece["x_pos"] + 1;
+		}
+		else {
+			blue_piece["x_temp"] = blue_piece["x_pos"] - 1;
+		}
+	}
+	// or we move the blue_piece on the y axis
+	else {
+		randVal = Math.floor(Math.random()*2);
+		if (randVal == 0){
+			blue_piece["y_temp"] = blue_piece["y_pos"] + 1;
+		}
+		else {
+			blue_piece["y_temp"] = blue_piece["y_pos"] - 1;
+		}
+	}
+	
+	return "Here we have: " + red_piece["x_temp"] + "," + red_piece["y_temp"]+ " and " + blue_piece["x_temp"] + "," + blue_piece["y_temp"];
+}
+
+/****************************************************************/
+
+/****************************************************************/
+
+function checkRedBounds(){
+	
+	if ( red_piece["x_temp"] < trial && red_piece["x_temp"] >= 0 && red_piece["y_temp"] < trial && red_piece["y_temp"] >= 0) {
+		red_piece["x_pos"] = red_piece["x_temp"];
+		red_piece["y_pos"] = red_piece["y_temp"];
+		red_piece["x_temp"] = red_piece["x_pos"];
+		red_piece["y_temp"] = red_piece["y_pos"];
+		var point = {
+		  x: red_piece["x_pos"],
+		  y: red_piece["y_pos"],
+		  color: red_piece["color"]
+		};
+		array[arrIndx] = point;
+		arrIndx++;
+		timesTouchedCounters[timesCounter] = point;
+		redNumTurns = redNumTurns + 1;
+		timesCounter++;
+	}
+	else {
+		red_piece["x_temp"] = red_piece["x_pos"];
+		red_piece["y_temp"] = red_piece["y_pos"];
+		var point = {
+		  x: red_piece["x_pos"],
+		  y: red_piece["y_pos"],
+		  color: red_piece["color"]
+		};
+		array[arrIndx] = point;
+		arrIndx++;
+	}
+}
+
+function getMax(){
+	var x = document.getElementById("numb").value;
+	return x;
+}
+
+/****************************************************************/
+/*	This function checks to see if the current move will take	*/
+/*	the blue piece outside of the game board.					*/
+/****************************************************************/
+var trial;
+function checkBlueBounds(){
+	trial = getMax();
+	if ( blue_piece["x_temp"] < trial && blue_piece["x_temp"] >= 0 && blue_piece["y_temp"] < trial && blue_piece["y_temp"] >= 0) {
+		blue_piece["x_pos"] = blue_piece["x_temp"];
+		blue_piece["y_pos"] = blue_piece["y_temp"];
+		blue_piece["x_temp"] = blue_piece["x_pos"];
+		blue_piece["y_temp"] = blue_piece["y_pos"];
+		var point = {
+		  x: blue_piece["x_pos"],
+		  y: blue_piece["y_pos"],
+		  color: blue_piece["color"]
+		};
+		array[arrIndx] = point;
+		arrIndx++;
+		timesTouchedCounters[timesCounter] = point;
+		blueNumTurns = blueNumTurns + 1;
+		timesCounter = timesCounter + 1;
+	}
+	else {
+		blue_piece["x_temp"] = blue_piece["x_pos"];
+		blue_piece["y_temp"] = blue_piece["y_pos"];
+		var point = {
+		  x: blue_piece["x_pos"],
+		  y: blue_piece["y_pos"],
+		  color: blue_piece["color"]
+		};
+		array[arrIndx] = point;
+		arrIndx++;
+	}
+}
+
+/****************************************************************/
+/*	This function checks to see if the two pieces are on the 	*/
+/*	same square on the board, and returns a boolean result.		*/
+/****************************************************************/
+
+function checkForOverlapping(){
+
+	if ( red_piece["x_pos"] == blue_piece["x_pos"] && red_piece["y_pos"] == blue_piece["y_pos"] ){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+/****************************************************************/
+/*	After a turn, this function will check for an overlap, and	*/
+/*	displays either:											*/
+/*	1. Which piece covered the other, how many turns each has	*/
+/*		taken, and the position where the overlap occured.		*/
+/*	1. A wait message.											*/
+/****************************************************************/
+
+function resultOfTurn() {
+
+	var result = checkForOverlapping();
+	if (result == true){
+		overlapFound = true;
+
+		if(redTurn == true){
+			var outputText = "The Red Piece has overlapped the Blue Piece! This occured during Red turn " + redNumTurns + " , and Blue turn " + blueNumTurns + ", at position " + red_piece["x_pos"] + "," + red_piece["y_pos"] + ".";
+			document.getElementById("second").innerHTML = outputText;
+		}
+		else {
+			var outputText = "The Blue Piece has overlapped the Red Piece! This occured during Blue turn " + blueNumTurns + ", and Red turn " + redNumTurns + ", at position " + red_piece["x_pos"] + "," + red_piece["y_pos"] + ".";
+			document.getElementById("second").innerHTML = outputText;
+		}
+	}
+	else {
+		document.getElementById("second").innerHTML = "Still working...";
+	}
+}
+
+/****************************************************************/
+/*	This is the main function for running the game.  It moves 	*/
+/*	one piece at a time, red then blue, checks bounds, and 		*/
+/* 	checks to see if a piece has covered the other.  			*/
+/****************************************************************/
+function playTheGame(){
+	//	Increase the number of total turns including times a piece didn't move
+	turnNum = turnNum + 1;
+
+	//	The game runs while no overlaps have occured and neither piece has moved
+	//	over a million times.
+	while ( overlapFound == false && redNumTurns < 1000000 && blueNumTurns < 1000000) {
+
+		// first red turn
+		moveRedPiece();
+		checkRedBounds();
+		resultOfTurn();
+		redTurn = false;
+		if (overlapFound == false){
+			moveBluePiece();
+			checkBlueBounds();
+			resultOfTurn();
+			redTurn = true;
+		}
+		turnNum = turnNum + 1;
+	}
+
+	if ( overlapFound == false && redNumTurns >= 1000000 && blueNumTurns >= 1000000){
+		document.getElementById("second").innerHTML = "After taking a million turns, the two pieces never landed on top of eachother. Game Over!";
+	}
+}
+
+
+/****************************************************************/
+/*	This function uses the data from the game to determine 		*/
+/*	what the max number of space touches was, what the min 		*/
+/*	number of touches was, and the average number of touches	*/
+/*	per board space.											*/
+/****************************************************************/
+function generateBoardData(){
+	
+	outputCounter = 0;
+	//	For loops used to move through spaces using x and y coordinates.
+	var trial2 = getMax();
+	for (var i = 0; i < trial2; i++){
+		for (var j = 0; j < trial2; j++){
+			// reset variables for each turn.
+			outputCounter = 0;
+			var tempMax = 0;
+			var tempMin = 0;
+			var lengthOfArray = timesCounter;
+			// Check to see how many times a particular space has been visited.
+			for (var k = 0; k < lengthOfArray; k ++){
+				if ( timesTouchedCounters[k].x == i && timesTouchedCounters[k].y == j ){
+					outputCounter++;
+					tempMax++;
+					tempMin++;
+				}
+			}
+			//	Here we add the number of times the board space was visited to an
+			//	array containing all the visit tallies for each space.
+			arrOfTouchTallies[touchIndex] = outputCounter;
+			touchIndex++;
+			//	If the tempMin is less that the least number of space visits recorded to this point, the minTimesTouched is updated to the tempMin.
+			if (tempMin < minTimesTouched){
+				minTimesTouched = tempMin;
+			}
+			//	Then the reverse is done for the Max Times touched.
+			if (tempMax > maxTimesTouched){
+				maxTimesTouched = tempMax;
+			}
+		}
+	}
+	// Reset the output counter.
+	outputCounter = 0;
+	var maxInd = 0;
+	var minInd = 0;
+	//	Now we add the spaces that have been visited min/max times to the appropriate arrays
+	for (var i = 0; i < boardMax; i ++){
+	  for (var j = 0; j < boardMax; j++){
+		outputCounter = 0;
+		var lengthOfArray = timesTouchedCounters.length;
+		for (var k = 0; k < lengthOfArray; k++){
+		  if ( timesTouchedCounters[k].x == i && timesTouchedCounters[k].y == j ){
+			outputCounter++;
+		  }
+		}
+	  }
+	}
+
+	// Reset the output counter.
+	outputCounter = 0;
+
+	//	Now we have max and min number of times visited, and the (x,y) coordinates of the spaces that correspond to these values.
+	//	Now we will find the average number of space visits.
+	var arrLength = touchIndex;
+	var runningTotal = 0;
+
+	for( var i = 0; i < arrLength; i++){
+	  runningTotal = runningTotal + arrOfTouchTallies[i];
+	}
+	//	Here we find the average number of visits.
+	var average = Math.floor((runningTotal)/(arrLength));
+	//	Here we start generating our final output statement.
+	var outputStatement5 = " The max number of visits was " + maxTimesTouched + ". ";
+	var outputStatement6 = " The min number of visits was " + minTimesTouched + ". ";
+	var outputStatement7 = " The average number of touches per space was " + average + ".";
+	var finalStatement = outputStatement5.concat(outputStatement6, outputStatement7);
+
+	//	And post the results.
+	document.getElementById("third").innerHTML  = finalStatement;
+
+
+}
+
+function drawBoard(){
+//setBoardMax();
+  var canvas = document.getElementById('myCanvas');
+  if(canvas.getContext){
+      var ctx = canvas.getContext('2d');
+      for(var i = boardMin;i < boardMax;i++){
+          for(var j = boardMin; j < boardMax;j++){
+              temp = j*20;
+              temp = temp+1;
+              ctx.strokeStyle = '#000000';
+              ctx.strokeRect(temp, i*20, 20, 20);
+          }
+      }
+  }
+}
+
+function setBoardMax(){
+//  This doesn't work, and I can't figure out why
+	boardMax = document.getElementById("numb").value;
+
+}
+
+
+function startMain(){
+	//window.setBoardMax(); //This function should have updated the boardMax
+	//  but I couldn't get it to work.
+	//window.setBoardMax();
+	window.drawBoard();
+
+	red_piece = {
+		x_pos: boardMin,
+		y_pos : boardMax-1,
+		x_temp :  boardMin,
+		y_temp : boardMax-1,
+		color : "red"
+	};
+	
+	blue_piece = {
+		x_pos: boardMax-1,
+		y_pos : boardMin,
+		x_temp :  boardMax-1,
+		y_temp : boardMin,
+		color : "blue"
+	};
+
+	//	Here we call the function to play the game.
+	window.playTheGame();
+	//	Here we call the function to generate the board data.
+	window.generateBoardData();
+	// This loop function will animate the token moves
+	window.loop();
+}
+
+
+function getXVars(){
+	retX = array[k].x;
+	retX = (retX*20)+11;
+	return retX;
+}
+function getYVars(){
+	retY = array[k].y;
+	retY = (retY*20)+11;
+	return retY;
+}
+
+function getPreviousX(){
+	retX = array[k-1].x;
+	retX = (retX*20)+11;
+	return retX;
+}
+function getPreviousY(){
+	retY = array[k-1].y;
+	retY = (retY*20)+11;
+	return retY;
+}
+
+function getColor(){
+retCol = array[k].color;
+  return retCol;
+}
+
+function loop() {
+	if(firstTurn == true){
+		k++;
+		m = getXVars();
+		n = getYVars();
+		varCol = getColor();
+		ctx.fillStyle = varCol;
+		ctx.beginPath();
+		ctx.strokeStyle = varCol;
+		//ctx.moveTo(i,j);
+		ctx.arc(m, n, 5, 0, Math.PI * 2, false);
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fill();
+		firstTurn = false;
+	}
+	else{
+		k++;
+		
+		varCol = getColor();
+		
+		
+		m = getXVars();
+		n = getYVars();
+		ctx.fillStyle = varCol;
+		ctx.beginPath();
+		ctx.strokeStyle = varCol;
+		//ctx.moveTo(i,j);
+		ctx.arc(m, n, radius, 0, Math.PI * 2, false);
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fill();
+		
+		/*		This erases the previous circles.
+		ctx.beginPath();
+		m = getPreviousX();
+		n = getPreviousY();
+		ctx.clearRect(m - radius - 1, n - radius - 1, radius * 2 + 2, radius * 2 + 2);
+		ctx.closePath();
+		*/ 
+		ctx.beginPath();
+		m = getPreviousX();
+		n = getPreviousY();
+		ctx.fillStyle = "#FFFFFF";
+		ctx.strokeStyle = "#FFFFFF";
+		ctx.arc(m,n,radius-3,0,Math.PI*2,false);
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fill();
+		
+	}
+	
+	window.setTimeout(loop, timing);
+}
+
+var radius = 5;
+
+function myFunction() {
+
+    var x, text;
+
+	// Get the value of the input field with id="numb"
+	x = document.getElementById("numb").value;
+
+	// If x is Not a Number or less than five or greater than 20
+	if (isNaN(x) || x < 5 || x > 20) {
+    	text = "Input not valid";
+	} else {
+    	boardMax = x;
+    	startMain();
+	}
+	
+}
+
+
+
+</script>
+</body>
+</html>
